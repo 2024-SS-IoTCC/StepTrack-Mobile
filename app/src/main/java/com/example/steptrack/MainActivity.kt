@@ -1,8 +1,14 @@
 package com.example.steptrack
 
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
 import android.widget.EditText
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import android.content.SharedPreferences
 import androidx.activity.enableEdgeToEdge
@@ -10,10 +16,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var usernameEditText: EditText
     private lateinit var saveButton: Button
     private lateinit var sharedPreferences: SharedPreferences
+
+    private var sensorManager: SensorManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +34,8 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
         usernameEditText = findViewById(R.id.usernameEditText)
         saveButton = findViewById(R.id.saveButton)
@@ -42,6 +52,26 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Please enter a username", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val stepSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+
+        if (stepSensor == null) {
+            Toast.makeText(this, "No step sensor available", Toast.LENGTH_SHORT).show()
+        } else {
+            sensorManager?.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_FASTEST)
+        }
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        val totalSteps = event!!.values[0]
+        val tv = findViewById<TextView>(R.id.tvCurrentSteps)
+        tv.text = "Current Steps: ${totalSteps.toInt()}"
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
     }
 
     private fun saveUsername(username: String) {
