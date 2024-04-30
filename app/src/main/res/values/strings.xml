@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">StepTrack</string>
+    <string name="step_tracker">Step Tracker</string>
+    <string name="logo_description" />
 </resources>
