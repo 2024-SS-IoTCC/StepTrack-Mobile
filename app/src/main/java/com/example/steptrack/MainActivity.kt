@@ -15,11 +15,16 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var usernameEditText: EditText
     private lateinit var saveButton: Button
     private lateinit var sharedPreferences: SharedPreferences
+
+    // executor service to send step data to the edge in regular intervals
+    private val executorService = Executors.newSingleThreadScheduledExecutor()
 
     private var sensorManager: SensorManager? = null
 
@@ -52,6 +57,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 Toast.makeText(this, "Please enter a username", Toast.LENGTH_SHORT).show()
             }
         }
+
+        executorService.scheduleAtFixedRate({
+            // TODO: send step data to edge
+
+            runOnUiThread {
+                // simulate sending of data
+                Toast.makeText(this, "Sending step data", Toast.LENGTH_SHORT).show()
+            }
+        }, 30, 30, TimeUnit.SECONDS)
     }
 
     override fun onResume() {
