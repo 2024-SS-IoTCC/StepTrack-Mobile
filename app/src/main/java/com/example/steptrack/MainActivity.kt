@@ -11,10 +11,12 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.gson.Gson
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -68,6 +70,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             // TODO: send step data to edge
 
             val stepEventsCount = stepEvents.size
+
+            val gson = Gson()
+            val json = gson.toJson(stepEvents)
+
+
+            Log.d("stepData", json)
             stepEvents.clear()
 
             runOnUiThread {
