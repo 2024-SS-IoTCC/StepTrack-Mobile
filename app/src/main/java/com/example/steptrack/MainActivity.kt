@@ -20,6 +20,8 @@ import com.google.gson.Gson
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+private const val usernameKey = "username"
+
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var usernameEditText: EditText
@@ -32,6 +34,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var sensorManager: SensorManager? = null
 
     data class StepEvent(val timestamp: String, val steps: Int)
+
+    data class StepMessage(val username: String, val stepEvents: MutableList<StepEvent>)
 
     // list to hold all step events during one interval
     private val stepEvents: MutableList<StepEvent> = mutableListOf()
@@ -68,19 +72,22 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         executorService.scheduleAtFixedRate({
             // TODO: send step data to edge
+            val username = sharedPreferences.getString(usernameKey, null)
+
+            if (username != null && stepEvents.size > 0) {
+                val message = StepMessage(username, stepEvents)
+                // TODO: coordinate exact key names with the edge team
+                val json = Gson().toJson(message)
+                Log.d("stepData", json)
+            }
 
             val stepEventsCount = stepEvents.size
-
-            val gson = Gson()
-            val json = gson.toJson(stepEvents)
-
-
-            Log.d("stepData", json)
             stepEvents.clear()
 
             runOnUiThread {
                 // simulate sending of data
-                Toast.makeText(this, "Sending step $stepEventsCount events", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Sending step $stepEventsCount events", Toast.LENGTH_SHORT)
+                    .show()
             }
         }, 30, 30, TimeUnit.SECONDS)
     }
@@ -108,11 +115,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun saveUsername(username: String) {
-        sharedPreferences.edit().putString("username", username).apply()
+        sharedPreferences.edit().putString(usernameKey, username).apply()
     }
 
     private fun loadUsername() {
-        val username = sharedPreferences.getString("username", null)
+        val username = sharedPreferences.getString(usernameKey, null)
         if (username != null) {
             usernameEditText.setText(username)
         } else {
