@@ -19,6 +19,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
+
     private lateinit var usernameEditText: EditText
     private lateinit var saveButton: Button
     private lateinit var sharedPreferences: SharedPreferences
@@ -27,6 +28,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private val executorService = Executors.newSingleThreadScheduledExecutor()
 
     private var sensorManager: SensorManager? = null
+
+    data class StepEvent(val timestamp: String, val steps: Int)
+
+    // list to hold all step events during one interval
+    private val stepEvents: MutableList<StepEvent> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,9 +67,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         executorService.scheduleAtFixedRate({
             // TODO: send step data to edge
 
+            val stepEventsCount = stepEvents.size
+            stepEvents.clear()
+
             runOnUiThread {
                 // simulate sending of data
-                Toast.makeText(this, "Sending step data", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Sending step $stepEventsCount events", Toast.LENGTH_SHORT).show()
             }
         }, 30, 30, TimeUnit.SECONDS)
     }
@@ -81,6 +90,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent?) {
         val totalSteps = event!!.values[0]
+        val timestamp = System.currentTimeMillis().toString()
+        stepEvents.add(StepEvent(timestamp, totalSteps.toInt()))
         val tv = findViewById<TextView>(R.id.tvCurrentSteps)
         tv.text = "Current Steps: ${totalSteps.toInt()}"
     }
