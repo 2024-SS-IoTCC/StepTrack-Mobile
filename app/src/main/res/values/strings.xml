@@ -3,5 +3,6 @@
     <string name="step_tracker">Step Tracker</string>
     <string name="logo_description">Logo</string>
     <string name="username_hint">Enter name here</string> 
-    <string name="save_button">Save</string> 
+    <string name="save_button">Save</string>
+    <string name="current_steps_empty">Current Steps: -</string>
 </resources>
