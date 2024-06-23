@@ -13,7 +13,7 @@ class MqttManager {
         mqttClient = MqttClient.builder()
             .useMqttVersion3()
             .identifier(UUID.randomUUID().toString())
-            .serverHost("broker.hivemq.com")
+            .serverHost("164.90.179.217")
             .serverPort(1883)
             .buildAsync()
 

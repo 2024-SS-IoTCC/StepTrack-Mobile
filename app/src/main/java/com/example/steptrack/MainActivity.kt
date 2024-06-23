@@ -139,8 +139,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun publishMessage(message: String) {
-        // Test topic
-        val topic = "f05a16cc-51c5-4d61-86c4-360c206dcfbb/usingmqtt"
+        val topic = "steptrack"
         mqttManager.publishMessage(topic, message)
     }
 
