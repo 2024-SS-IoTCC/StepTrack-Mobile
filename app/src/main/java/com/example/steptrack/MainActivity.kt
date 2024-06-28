@@ -76,14 +76,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
 
         executorService.scheduleAtFixedRate({
-            // TODO: send step data to edge
+            // send step data to edge
             val username = sharedPreferences.getString(usernameKey, null)
 
             var json = ""
 
             if (username != null && stepEvents.size > 1) {
+                // a message is only sent to the edge if there is more than one step event
                 val message = StepMessage(username, stepEvents)
-                // TODO: coordinate exact key names with the edge team
                 json = Gson().toJson(message)
                 Log.d("stepData", json)
             } else {
