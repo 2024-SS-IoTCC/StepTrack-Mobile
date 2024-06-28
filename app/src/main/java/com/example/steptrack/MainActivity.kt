@@ -24,6 +24,8 @@ private const val usernameKey = "username"
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
+    private lateinit var mqttManager: MqttManager
+
     private lateinit var usernameEditText: EditText
     private lateinit var saveButton: Button
     private lateinit var sharedPreferences: SharedPreferences
@@ -52,6 +54,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             insets
         }
 
+        mqttManager = MqttManager()
+        mqttManager.connect()
+
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
         usernameEditText = findViewById(R.id.usernameEditText)
@@ -71,23 +76,29 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
 
         executorService.scheduleAtFixedRate({
-            // TODO: send step data to edge
+            // send step data to edge
             val username = sharedPreferences.getString(usernameKey, null)
 
-            if (username != null && stepEvents.size > 0) {
+            var json = ""
+
+            if (username != null && stepEvents.size > 1) {
+                // a message is only sent to the edge if there is more than one step event
                 val message = StepMessage(username, stepEvents)
-                // TODO: coordinate exact key names with the edge team
-                val json = Gson().toJson(message)
+                json = Gson().toJson(message)
                 Log.d("stepData", json)
+            } else {
+                Log.d("stepData","Message could not be send for username $username and ${stepEvents.size} step events.")
+                return@scheduleAtFixedRate
             }
 
             val stepEventsCount = stepEvents.size
             stepEvents.clear()
 
             runOnUiThread {
-                // simulate sending of data
+                // send data
                 Toast.makeText(this, "Sending step $stepEventsCount events", Toast.LENGTH_SHORT)
                     .show()
+                publishMessage(json)
             }
         }, 30, 30, TimeUnit.SECONDS)
     }
@@ -125,5 +136,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         } else {
             Toast.makeText(this, "Please enter a username", Toast.LENGTH_LONG).show()
         }
+    }
+
+    private fun publishMessage(message: String) {
+        val topic = "steptrack"
+        mqttManager.publishMessage(topic, message)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mqttManager.disconnect()
     }
 }
